@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My Quiz App</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <div class="container mt-5 pt-5">
+        <div class="col-md-6 mx-auto">
+          <h2>Let us test our knowledge</h2>
+          <div v-for="question in questions" :key="question.uid">
+            <hr />
+            <p>[[ question.question ]]</p>
+            <div
+              class="form-check"
+              v-for="(answer, index) in question.answers"
+              :key="index"
+            >
+              <input
+                @change="checkAnswer($event, question.uid, index)"
+                :value="answer.answer"
+                class="form-check-input"
+                type="checkbox"
+                :id="`flexCheck${question.uid}-${index}`"
+                value=""
+              />
+              <label
+                :for="`flexCheck${question.uid}-${index}`"
+                class="form-check-label"
+              >
+                [[answer.answer]]
+              </label>
+            </div>
+            <hr />
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+      const app = Vue.createApp({
+        el: "#app",
+        delimiters: ["[[", "]]"],
+        data() {
+          return {
+            category: "{{category}}",
+            questions: [],
+          };
+        },
+        methods: {
+          getQuestions() {
+            console.log(this.category);
+            fetch(`/api/quiz/?category=${this.category}`)
+              .then((response) => response.json())
+              .then((result) => {
+                this.questions = result.data;
+              })
+              .catch((error) => {
+                console.error("Error fetching questions:", error);
+              });
+          },
+          checkAnswer(event, questionUid) {
+            this.questions.map((question) => {
+              answers = question.answers;
+              for (var i = 0; i < question.answers.length; i++) {
+                if (answers[i].answer == event.target.value) {
+                  if (answers[i].is_correct) {
+                    alert("correct answer");
+                  } else {
+                    alert("incorrect answer");
+                  }
+                }
+              }
+            });
+          },
+        },
+        created() {
+          this.getQuestions();
+        },
+      });
+
+      app.mount("#app");
+    </script>
+  </body>
+</html>
